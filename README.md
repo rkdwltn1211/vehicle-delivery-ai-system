@@ -1,5 +1,5 @@
 # vehicle-delivery-ai-system
-
+-----------------------------
 vehicle-delivery-ai-system
 │
 ├─ damage_detection          # 차량 흠집 판정
@@ -28,3 +28,4 @@ vehicle-delivery-ai-system
 │  └─ 시스템설명.pdf
 │
 └─ README.md
+-------------------------------
