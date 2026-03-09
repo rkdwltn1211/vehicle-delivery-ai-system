@@ -82,21 +82,29 @@ vehicle-delivery-ai-system
 │ ├ model
 │ └ result
 │
-├ driver_matching         # 기사 매칭 / 경로
+├ driver_matching         # 기사 매칭 / 경로 최적화
 │ ├ data
+│ │ ├ delivery_orders_2026.csv
+│ │ └ delivery_orders_2026_utf8_version.csv
+│ │
 │ ├ notebooks
+│ │ └ driver_matching_model.ipynb
+│ │
 │ └ result
 │
 ├ review_sentiment        # 리뷰 감정 분석
 │ ├ data
+│ │ ├ drivers_2026.xlsx
+│ │ └ review_label.csv
+│ │
 │ ├ notebooks
-│ ├ model
-│ └ result
+│ │ └ review_sentiment_analysis.ipynb
+│ 
 │
 ├ database
 │ └ mysql
 │
-├ docs                    # 설명 자료
+├ docs
 │ ├ 탁송흐름도.png
 │ └ 시스템설명.pdf
 │
