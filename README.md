@@ -33,3 +33,16 @@ vehicle-delivery-ai-system
 └ README.md
 ```
 -------------------------------
+
+## 프로젝트 소개
+
+## 주요 기능
+1. 차량 흠집 판정
+2. 기사 매칭 및 경로 최적화
+3. 리뷰 감정 분석
+
+## 프로젝트 구조
+(폴더 구조)
+
+## 사용 기술
+Python, Pandas, TensorFlow, MySQL
