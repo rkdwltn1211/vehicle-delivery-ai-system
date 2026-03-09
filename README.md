@@ -89,8 +89,8 @@ vehicle-delivery-ai-system
 │ │
 │ ├ notebooks
 │ │ └ driver_matching_model.ipynb
-│ │
-│ └ result
+│ 
+│ 
 │
 ├ review_sentiment        # 리뷰 감정 분석
 │ ├ data
@@ -148,10 +148,4 @@ Database
 
 ---
 
-## 👨‍💻 Developer
-
-강지수
-
-GitHub
-https://github.com/rkdwltn1211
 
