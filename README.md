@@ -21,7 +21,6 @@ vehicle-delivery-ai-system
 ├ driver_matching         # 기사 매칭 / 경로
 │ ├ data
 │ ├ notebooks
-│ ├ algorithm
 │ └ result
 │
 ├ review_sentiment        # 리뷰 감정 분석
