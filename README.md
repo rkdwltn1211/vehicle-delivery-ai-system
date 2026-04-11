@@ -32,7 +32,7 @@
 ## 🏆 나의 담당 — 차량 흠집 탐지 시스템
 
 > 💡 팀 프로젝트 이후 담당 파트를 **FastAPI 서버 + AWS EC2 배포**까지 독립 서비스로 고도화했습니다.  
-> 👉 **[![GitHub](https://img.shields.io/badge/GitHub-vehicle--damage--detection-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/rkdwltn1211/vehicle-damage-detection)** — 개인 고도화 레포 (Live Demo 포함)
+> 👉 **[![GitHub](https://img.shields.io/badge/GitHub-vehicle--damage--detection-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/rkdwltn1211/vehicle-damage-detection)** 개인 고도화 레포 (Live Demo 포함)
 
 ### 핵심 성과
 
