@@ -22,7 +22,7 @@
 
 | 팀원 | 담당 파트 | 주요 내용 |
 |------|----------|----------|
-| **강지수 ★** | **차량 흠집 탐지** | ResNet18 기반 CNN 심각도 모델 설계·학습, OpenCV 위치 탐지, 라벨링 체계 설계 |
+| **강지수 ★** | **차량 흠집 탐지** | EfficientNet-B0 기반 CNN 심각도 모델 설계·학습, OpenCV 데이터 파이프라인, 라벨링 체계 설계, FastAPI 서버 + AWS EC2 배포 |
 | 장성우 | 매칭 알고리즘 | 기사 신뢰도 기반 자동 배차, 최적 운행 경로 추천 |
 | 강대규 | 리뷰 감정 분석 | 고객 리뷰 키워드 AI 학습, 감정 분류 시스템 |
 | 이상혁 | 서버 & DB | MySQL 설계, Flask 서버 구축, 웹 페이지 구현 |
@@ -31,6 +31,9 @@
 
 ## 🏆 나의 담당 — 차량 흠집 탐지 시스템
 
+> 💡 팀 프로젝트 이후 담당 파트를 **FastAPI 서버 + AWS EC2 배포**까지 독립 서비스로 고도화했습니다.  
+> 👉 **[vehicle-damage-detection](https://github.com/rkdwltn1211/vehicle-damage-detection)** — 개인 고도화 레포 (Live Demo 포함)
+
 ### 핵심 성과
 
 | 항목 | 내용 |
@@ -38,9 +41,10 @@
 | 수집 차량 | 126대 직접 수집 (인터넷 이미지 + 스크래치 합성) |
 | 심각도 라벨 | 0~4단계 직접 설계 |
 | 차량당 촬영 | 전·후 각 6앵글 (12장/대) |
-| CNN 학습 | 67대, 25 epoch, Loss 0.638 → 0.018 |
+| CNN 학습 | EfficientNet-B0, val accuracy 64% |
 | 실제 추론 결과 | 차량 26_2 → severity: 4, raw_score: 4.0 ✅ |
-| 탐지 방식 | CNN(심각도) + OpenCV(위치) 이중 파이프라인 |
+| 탐지 방식 | CNN 심각도 판정 + OpenCV 데이터 파이프라인 |
+| 배포 | FastAPI + AWS EC2 (t3.micro) |
 
 ---
 
@@ -58,39 +62,32 @@
 
 ## 🧠 주요 기능
 
-### 🚗 차량 흠집 탐지 (내가 담당한 파트)
+### 🚗 차량 흠집 탐지 (강지수 담당)
 
 탁송 전·후 차량 사진을 비교하여 **신규 흠집 여부 및 손상 심각도(0~4)**를 자동 판정합니다.
 
-**두 가지 모듈로 구성:**
+#### CNN 분류 모델 — 심각도(0~4) 예측
+- **EfficientNet-B0** (ImageNet pretrained) Transfer Learning
+- 클래스 불균형 대응: CrossEntropyLoss 가중치 적용
+- Early Stopping (patience=5) 적용
+- 데이터 증강으로 634개 → 4,190장 확보
+- val accuracy: **64%**
 
-#### ① CNN 회귀 모델 — 심각도(0~4) 예측
-- ResNet18 기반 **9채널 입력 직접 설계** (before 3ch + after 3ch + diff 3ch)
-- 67대 학습 / 25 epoch / Loss 0.638 → 0.018 수렴
-- 6각도 뷰 예측값을 **max+mean 가중 풀링**으로 최종 점수 산출
-- 결과 JSON 저장 + 엑셀 사고점수 자동 반영
-
-#### ② OpenCV 파이프라인 — 흠집 위치 시각화
+#### 데이터 파이프라인 (OpenCV)
 ```
-탁송 전 이미지 + 탁송 후 이미지
+before 이미지 + after 이미지
         │
         ▼
 ① ECC 정렬          촬영 각도 차이 자동 보정
         │
         ▼
-② CLAHE 명암 보정   조명 차이 제거
+② Canny 엣지 탐지   흠집 영역 마스크 생성
         │
         ▼
-③ 픽셀 차분         변화 영역 검출 (absdiff)
+③ Morphology 필터   노이즈 제거
         │
         ▼
-④ 형태학적 필터링   노이즈 제거
-        │
-        ▼
-⑤ 오탐 필터         위치·크기·종횡비 기반 정확도 향상
-        │
-        ▼
-⑥ 바운딩 박스       초록 박스로 손상 위치 시각화
+④ ROI 패치 추출     흠집 영역 크롭 → CNN 입력
 ```
 
 #### 심각도 라벨링 체계 (0~4단계 직접 설계)
@@ -154,8 +151,8 @@ vehicle-delivery-ai-system/
 ├── damage_detection/              # 🚗 차량 흠집 탐지 (강지수 담당)
 │   ├── data/
 │   ├── notebooks/
-│   │   ├── severity.ipynb         # CNN 회귀 모델 학습 & 추론
-│   │   └── damege_box.ipynb       # OpenCV 흠집 위치 탐지
+│   │   ├── severity.ipynb         # CNN 모델 학습 & 추론
+│   │   └── damege_box.ipynb       # OpenCV 데이터 파이프라인
 │   ├── model/
 │   │   └── checkpoints/
 │   │       └── regressor_view_mixpool.pth
@@ -192,12 +189,13 @@ vehicle-delivery-ai-system/
 | 분류 | 기술 |
 |------|------|
 | 언어 | Python |
-| CNN 모델 | PyTorch, torchvision (ResNet18) |
+| CNN 모델 | PyTorch, EfficientNet-B0 (torchvision) |
 | 이미지 처리 | OpenCV, PIL |
 | 데이터 분석 | Pandas, NumPy |
 | 시각화 | Matplotlib, Seaborn |
-| 서버 | Flask |
+| 백엔드 | FastAPI (강지수 파트), Flask |
 | DB | MySQL |
+| 배포 | AWS EC2 (강지수 파트) |
 | 기타 | Jupyter Notebook |
 
 ---
@@ -207,14 +205,14 @@ vehicle-delivery-ai-system/
 | 한계 | 개선 방향 |
 |------|----------|
 | 126대 소규모 데이터셋 — Score 3·4(심각) 케이스 희귀 | 데이터 증강, 실제 탁송 이미지 추가 수집 |
-| CNN과 OpenCV 모듈 간 통합 연동 미완성 | 심각도 점수 + 위치 정보를 하나의 파이프라인으로 통합 |
-| 로컬 서버(Flask) 기반 — 실시간 서비스 환경 미반영 | AWS / GCP 클라우드 배포, YOLO 기반 객체 탐지 통합 |
+| val accuracy 64% — 소규모 데이터 한계 | CarDD 등 공개 데이터셋 추가 결합 시 성능 향상 가능 |
+| 흠집 위치 시각화 미구현 | OpenCV 바운딩 박스 파이프라인 통합 예정 |
 
 ---
 
 ## 📝 One-line Summary
 
-> **탁송 차량의 전·후 이미지를 CNN + OpenCV 이중 파이프라인으로 분석하여 흠집 심각도(0~4)를 자동 판정하고, 기사 매칭·리뷰 감정 분석을 통합한 AI 기반 탁송 서비스를 구현**한 팀 프로젝트입니다.
+> **탁송 차량의 전·후 이미지를 EfficientNet-B0 CNN + OpenCV 파이프라인으로 분석하여 흠집 심각도(0~4)를 자동 판정하고, 기사 매칭·리뷰 감정 분석을 통합한 AI 기반 탁송 서비스를 구현**한 팀 프로젝트입니다.
 
 ---
 
